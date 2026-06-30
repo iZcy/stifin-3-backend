@@ -11,17 +11,18 @@ const galleryRoutes = require('./routes/gallery')
 const app = express()
 const PORT = process.env.PORT || 5000
 
-console.log('=== DEBUG ENV ===')
-console.log('PORT:', process.env.PORT)
-console.log('MONGO_URI:', process.env.MONGO_URI ? '✓ defined' : '✗ undefined')
-const mongoKeys = Object.keys(process.env).filter(k => k.toLowerCase().includes('mongo'))
-console.log('Env keys containing "mongo":', mongoKeys.length ? mongoKeys : '(none)')
-console.log('All env keys:', Object.keys(process.env).slice(0, 20).join(', '))
-console.log('================')
-
 connectDB()
 
-app.use(cors())
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',')
+  : ['http://localhost:5173', 'http://localhost:4173']
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
+    cb(null, true)
+  },
+}))
 app.use(express.json())
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
